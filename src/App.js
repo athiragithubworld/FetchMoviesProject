@@ -6,39 +6,57 @@ import "./App.css";
 function App() {
   const [movies, setMovies] = useState([]);
   const [isloading, setIsloading] = useState(false);
+  const [errors, setError] = useState(null);
 
   async function FetchMovieHandler() {
     setIsloading(true);
-    const response = await fetch("https://swapi.dev/api/films");
+    setError(null);
+    try {
+      const response = await fetch("https://swapi.dev/api/film");
 
-    const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Something went wrong ... retrying...");
+      }
 
-    const transformedMovies = data.results.map((movieData) => {
+      const data = await response.json();
+
+      const transformedMovies = data.results.map((movieData) => {
+        return {
+          id: movieData.episode_id,
+          title: movieData.title,
+          releaseDate: movieData.release_date,
+          openingText: movieData.opening_crawl,
+        };
+      });
+      setMovies(transformedMovies);
       setIsloading(false);
-      return {
-        id: movieData.episode_id,
-        title: movieData.title,
-        releaseDate: movieData.release_date,
-        openingText: movieData.opening_crawl,
-      };
-    });
-    setMovies(transformedMovies);
+    } catch (error) {
+      setError(error.message);
+    }
+    setIsloading(false);
   }
 
-  // const dummyMovies = [
-  //   {
-  //     id: 1,
-  //     title: 'Some Dummy Movie',
-  //     openingText: 'This is the opening text of the movie',
-  //     releaseDate: '2021-05-18',
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'Some Dummy Movie 2',
-  //     openingText: 'This is the second opening text of the movie',
-  //     releaseDate: '2021-05-19',
-  //   },
-  // ];
+  let content = <h3>Movies not found.</h3>;
+
+  if (movies.length > 0) {
+    content = <MoviesList movies={movies} />;
+  }
+  if (errors) {
+    const cancelHandler = () => {
+      setError(null);
+    };
+
+    content = (
+      <div>
+        <h3>{errors}</h3>
+        {errors && <button onClick={cancelHandler}>Cancel</button>}
+      </div>
+    );
+  }
+
+  if (isloading) {
+    content = <h3>Loading...</h3>;
+  }
 
   return (
     <React.Fragment>
@@ -47,9 +65,11 @@ function App() {
       </section>
 
       <section>
-        {isloading && <h2>Loading...</h2>}
+        {content}
+        {/* {isloading && <h2>Loading...</h2>}
         {!isloading && movies.length > 0 && <MoviesList movies={movies} />}
         {!isloading && movies.length === 0 && <h3>Movies not found </h3>}
+        {!isloading && error && <h3>{error}</h3>} */}
       </section>
     </React.Fragment>
   );
