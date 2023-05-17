@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -8,11 +8,11 @@ function App() {
   const [isloading, setIsloading] = useState(false);
   const [errors, setError] = useState(null);
 
-  async function FetchMovieHandler() {
+  const FetchMovieHandler = useCallback(async () => {
     setIsloading(true);
     setError(null);
     try {
-      const response = await fetch("https://swapi.py4e.com/api/film/");
+      const response = await fetch("https://swapi.py4e.com/api/films/");
 
       if (!response.ok) {
         throw new Error("Something went wrong ...");
@@ -37,20 +37,26 @@ function App() {
       }
     }
     setIsloading(false);
-  }
+  }, [errors]);
 
   useEffect(() => {
     let timer = 0;
     if (errors !== null) {
       timer = setTimeout(() => {
         console.log("Retrying1");
+
         FetchMovieHandler();
+        // setError("Retrying...");
       }, 5000);
     }
     return () => {
       clearInterval(timer);
     };
   }, [errors]);
+
+  useEffect(() => {
+    FetchMovieHandler();
+  }, []);
 
   let content = <h3>Movies not found.</h3>;
 
