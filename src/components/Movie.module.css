@@ -1,4 +1,5 @@
 .movie {
+  justify-content: center;
   margin: 1rem;
   padding: 1rem;
   background-color: #230052;
@@ -6,6 +7,7 @@
   border-radius: 12px;
   text-align: center;
   color: white;
+  white-space: pre-line;
 }
 
 .movie h2 {
